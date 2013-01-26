@@ -1,0 +1,6 @@
+[submodule "_layouts"]
+	path = _layouts
+	url = git://github.com/Nexmo/_layouts.git
+[submodule "_includes"]
+	path = _includes
+	url = git://github.com/Nexmo/_includes.git

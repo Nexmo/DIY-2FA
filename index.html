@@ -1,0 +1,44 @@
+---
+layout: landing
+title: SMS Verification
+---
+<hr>
+
+<div class="jumbotron">  
+  <h1>SMS Verification</h1>
+  <p class="lead">SMS Verification is used for 2nd factor authentication, and to verify ownership of a phone number or device.</p>
+  <a href="https://github.com/Nexmo/Verify" class="btn btn-large btn-success">Browse Verification Example</a>
+</div>
+
+<hr>
+
+<div class="row-fluid marketing">
+  <div class="span6">
+    <h4>Verification Service</h4>
+    <p>The example code is a simple PHP script implementing a verification service on top of Nexmo's API.
+      <ul>
+        <li>A number is traded for a hash.</li>
+        <li>The verification service sends an SMS with a PIN to that number.</li>
+        <li>That PIN is provided by the end user.</li>
+        <li>Number, hash, and PIN are passed to the verification service to get the result.</li>
+      </ul>
+    </p>
+
+    <h4>Example Code?</h4>
+    <p>If you're a developer, the provided example should be easy to take and modify to your needs. If you're not, you can find a <a href="">developer with Nexmo experience on oDesk</a>, and point them to this page.</p>
+  </div>
+
+  <div class="span6">
+    <h4>2nd Factor Authentication</h4>
+    <p>Adding a 2nd factor to a login system, in this case a mobile phone, increases security as a physical device is needed in addition to the username and password.</p>
+    <p>For a web application, after validating a credential pair the application would request 2nd factor verification from a service similar to this example.</p>
+
+    <h4>Number Ownership</h4>
+    <p>Verifying that a user is the owner of a phone number is a common mobile application use case. On signup or install, the mobile application would collect the phone number. Then the application would use a service similar to this example to ensure the user owns the phone number.</p>
+  </div>
+</div>
+
+
+
+<hr>
+
