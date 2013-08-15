@@ -1,6 +1,10 @@
 <?php
 class Verify
 {
+    const SMS  = 'sms';
+    const USSD = 'ussd';
+    const TTS  = 'tts';
+
     protected $key;
     protected $secret;
     protected $from;
@@ -8,7 +12,7 @@ class Verify
     protected $salt = null;
     protected $length = 4;
     
-    const API_URI = 'http://rest.nexmo.com/sms/json?username=%1$s&password=%2$s&from=%3$s&to=%4$s&text=%5$s';
+    const API_URI = 'http://rest.nexmo.com/%s/json';
     const HTTP_GET = 'GET';
     const HTTP_POST = 'POST';
     
@@ -43,22 +47,23 @@ class Verify
     
     public function post($params)
     {
+        //set some defaults for optional params
+        $params = array_merge(array('type' => self::SMS), $params);
+
         //check for valid request
         if(!isset($params['number'])){
             throw new Exception('missing required param: number', 400);
         }
-        
-        $number = $params['number'];
         
         //generate pin
         $pin = rand(0, pow(10,$this->length)-1);
         $pin = str_pad($pin, $this->length, '0', STR_PAD_LEFT);
         
         //send pin
-        $this->sendSms($number, $pin);
+        $this->sendMessage($params['number'], $pin, $params['type']);
         
         //get hash
-        $hash = $this->getHash($pin, $number);
+        $hash = $this->getHash($pin, $params['number']);
         
         //return hash
         return array('hash' => $hash);
@@ -78,22 +83,56 @@ class Verify
         }
     }
     
-    protected function sendSms($to, $text)
+    protected function sendMessage($to, $text, $endpoint = self::SMS)
     {
-        $uri = sprintf(self::API_URI, $this->key, $this->secret, $this->from, $to, $text);
-        $result = file_get_contents($uri);
+        //verify valid endpoint
+        if(!in_array($endpoint, array(self::SMS, self::TTS, self::USSD))){
+            throw new InvalidArgumentException('invalid message type: ' . $endpoint);
+        }
+
+        //make the message a little more friendly than just a number
+        $text = 'Your PIN is: ' . $text;
+
+        //some channel specific changes
+        switch($endpoint){
+            case self::TTS:
+                $text .= '. ' . $text;
+                break;
+        }
+
+        $url = sprintf(self::API_URI, $endpoint) . '?' . http_build_query(array(
+            'username' => $this->key,
+            'password' => $this->secret,
+            'from'     => $this->from,
+            'to'       => $to,
+            'text'     => $text
+            ));
+
+        error_log($url);
+
+        $result = file_get_contents($url);
         $result = json_decode($result);
-        foreach($result->messages as $message){
-            if(isset($message->{'error-text'})){
-                throw new Exception($message->{'error-text'}, 500);
-            }
+
+        //channel specific responses
+        switch($endpoint){
+            case self::USSD:
+            case self::SMS:
+                foreach($result->messages as $message){
+                    if(isset($message->{'error-text'})){
+                        throw new RuntimeException($message->{'error-text'}, 500);
+                    }
+                }
+                break;
+            case self::TTS:
+                if($result->status != 0){
+                    throw new RuntimeException('error sending TTS: ' . $result->status);
+                }
+                break;
         }
     }
     
     protected function getHash($pin, $number)
     {
-        error_log('hashing: ' . implode(' : ', array($pin, $number, $this->salt)));
-        error_log(sha1($number . $pin . $this->salt));
         return sha1($number . $pin . $this->salt);
     }
 }

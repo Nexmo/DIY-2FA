@@ -22,4 +22,8 @@ Response: `{"valid":false}`
 - Copy source to a web root.
 - Add Nexmo credentials through environment variables, or `define()`
 - Route all requests to `index.php` (in many cases this will happen by default; if not, `index.php` can be prepended
-  to the `GET` requests). 
+  to the `GET` requests).
+
+## Alternative Channels
+
+To use TTS (Text-to-Speech) or USSD, add the optional `type` parameter: `POST /?number=13215551212&type=tts` 
