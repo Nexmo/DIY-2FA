@@ -27,40 +27,52 @@ class Verify
         }
     }
     
-    public function run($method, $params)
+    public function get($id, $params)
+    {
+        error_log($id);
+
+        foreach(array('number', 'pin') as $param){
+            if(!isset($params[$param])){
+                throw new Exception('missing required param: ' . $param, 400);
+            }
+        }
+
+        //return validation status
+        return array('valid' => $this->getHash($params['pin'], $params['number']) == $id);
+    }
+    
+    public function post($params)
+    {
+        //check for valid request
+        if(!isset($params['number'])){
+            throw new Exception('missing required param: number', 400);
+        }
+        
+        $number = $params['number'];
+        
+        //generate pin
+        $pin = rand(0, pow(10,$this->length)-1);
+        $pin = str_pad($pin, $this->length, '0', STR_PAD_LEFT);
+        
+        //send pin
+        $this->sendSms($number, $pin);
+        
+        //get hash
+        $hash = $this->getHash($pin, $number);
+        
+        //return hash
+        return array('hash' => $hash);
+    }
+    
+    public function run($method, $request, $params)
     {
         switch($method){
             //verify a pin
             case self::HTTP_GET:
-                foreach(array('number', 'pin', 'hash') as $param){
-                    if(!isset($params[$param])){
-                        throw new Exception('missing required param: ' . $param, 400);
-                    }
-                }
-                
-                //return validation status
-                return array('valid' => $this->getHash($params['pin'], $params['number']) == $params['hash']);
+                return $this->get($request, $params);
             //get a new token
             case self::HTTP_POST:
-                //check for valid request
-                if(!isset($params['number'])){
-                    throw new Exception('missing required param: number', 400);
-                }
-                
-                $number = $params['number'];
-                
-                //generate pin
-                $pin = rand(0, pow(10,$this->length)-1);
-                $pin = str_pad($pin, $this->length, '0', STR_PAD_LEFT);
-                
-                //send pin
-                $this->sendSms($number, $pin);
-                
-                //get hash
-                $hash = $this->getHash($pin, $number);
-                
-                //return hash
-                return array('hash' => $hash);
+                return $this->post($params);               
             default:
                 throw new Exception('invalid request: ' . $method, 400);
         }
@@ -80,6 +92,8 @@ class Verify
     
     protected function getHash($pin, $number)
     {
+        error_log('hashing: ' . implode(' : ', array($pin, $number, $this->salt)));
+        error_log(sha1($number . $pin . $this->salt));
         return sha1($number . $pin . $this->salt);
     }
 }
