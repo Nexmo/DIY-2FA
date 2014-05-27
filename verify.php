@@ -81,7 +81,11 @@ class Verify
     protected function sendSms($to, $text)
     {
         $uri = sprintf(self::API_URI, $this->key, $this->secret, $this->from, $to, $text);
-        $result = file_get_contents($uri);
+
+        $ch = curl_init($uri);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $result = curl_exec($ch);
+        curl_close($ch);
         $result = json_decode($result);
         foreach($result->messages as $message){
             if(isset($message->{'error-text'})){
