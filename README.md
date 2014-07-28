@@ -23,16 +23,43 @@ We'll build a simple verification web interface using two PHP scripts.
 The first will accept a form `POST` with the phone number to be verified. When a number is received, a unique code will 
 be generated, and stored in the current session.
 
-[Code](https://github.com/Nexmo/Verify/blob/master/how-to/index.php#L5-L8)
+    session_start();
+    $number = $_POST['number'];
+    $code = rand(1000, 9999); // random 4 digit code
+    $_SESSION['code'] = $code; // store code for later
+    
+[*View in Context*](https://github.com/Nexmo/Verify/blob/master/how-to/index.php#L5-L8)
 
 We then send the code to the user by making an HTTP call to the Nexmo API.
+    
+    $url = 'https://rest.nexmo.com/sms/json?' . http_build_query(array(
+            'api_key' => NEXMO_KEY,
+            'api_secret' => NEXMO_SECRET,
+            'from' => NEXMO_FROM,
+            'to' => $number,
+            'text' => 'Your verification code is: ' . $code
+        ));
 
-[Code](https://github.com/Nexmo/Verify/blob/master/how-to/index.php#L10-L21)
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    $result = curl_exec($ch);
+    curl_close($ch);
+    
+[*View in Context*](https://github.com/Nexmo/Verify/blob/master/how-to/index.php#L10-L21)
 
 The second script will accept a form `POST` with the user provided code, and verify that it matches the one set in the 
 first step. 
 
-[Code](https://github.com/Nexmo/Verify/blob/master/how-to/confirm.php#L3-L10)
+    if(isset($_POST['code'])){
+        session_start();
+        if($_SESSION['code'] == $_POST['code']){
+            $text = "Your phone number has been confirmed.";
+        } else {
+            $text = "Sorry that code could not be verified.";
+        }
+    }
+    
+[*View in Context*](https://github.com/Nexmo/Verify/blob/master/how-to/confirm.php#L3-L10)
 
 Now we just add a little HTML to tie all this to a simple user interface [and complete the example](https://github.com/Nexmo/Verify/tree/master/how-to).
 
