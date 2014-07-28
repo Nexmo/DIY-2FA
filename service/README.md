@@ -1,4 +1,4 @@
-# Simple number verification/second factor authentication service.
+# Simple Verification API
 
 ## Usage
 
