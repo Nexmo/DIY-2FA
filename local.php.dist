@@ -1,0 +1,5 @@
+<?php
+// Update this file, and rename to .local.php to provide credentials by file.
+define('NEXMO_KEY',    'your key');
+define('NEXMO_SECRET', 'your secret');
+define('NEXMO_FROM',   'your nexmo virtual number');
