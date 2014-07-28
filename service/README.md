@@ -27,5 +27,5 @@ Response: `{"valid":false}`
 ## Security
 
 This is a simplistic example, and the method used to generate/verify the code is not at all random. If the server 
-side key is known, it's reativly easy to brute force the pin. This method works well only as an example that avoids
+side key is known, it's relatively easy to brute force the pin. This method works well only as an example that avoids
 any storage of the pin. **You should not use this in production without replacing the pin generation/verification.**
