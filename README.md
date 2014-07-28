@@ -1,4 +1,4 @@
-# Nexmo How-To | Number Verification & 2FA
+# [How-To] Number Verification & 2FA
 
 ## Use Case
 Verifying that a user owns a phone number has a few similar uses. A common mobile application use case is a one time 
